@@ -46,6 +46,21 @@ input:focus-visible,button:focus-visible,.btn:focus-within{outline:3px solid #8E
 #panel{z-index:6}
 #ctl{display:flex;gap:.8rem;justify-content:center}
 #ctl button{min-width:3.4rem;padding:.6rem 1.1rem;font-size:1.1rem}
+#panel{max-height:78vh;overflow-y:auto}
+#srch{flex:1 1 100%}
+#res{max-height:38vh;overflow-y:auto;margin-bottom:.5rem}
+.rs{font-weight:700;color:#6B2F6E;font-size:.8rem;margin:.5rem .2rem .2rem}
+.rr{display:flex;align-items:center;gap:.7rem;width:100%;text-align:left;background:rgba(255,255,255,.6);color:#4A1D4D;border-radius:.9rem;padding:.4rem .6rem;margin:.2rem 0;font-weight:500}
+.rt{flex:none;width:2.8rem;height:2.8rem;border-radius:.5rem;background:#E5619A center/cover}
+.rx{display:flex;flex-direction:column;min-width:0}
+.rx b,.rx i{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rx i{font-style:normal;font-size:.8rem;color:#7A4A7C}
+#res .empty{color:#7A4A7C;padding:.5rem}
+#q{width:100%;font:inherit;padding:.8rem 1.1rem;border-radius:2rem;border:2px solid #F3B7D1;background:#fff;color:#4A1D4D}
+#q:focus-visible{outline:3px solid #8E2A5E;outline-offset:2px}
+#own{flex:1 1 100%}
+#own summary{cursor:pointer;color:#6B2F6E;font-weight:700;text-align:center;padding:.3rem}
+.ownrow{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin-top:.6rem}
 #spbox{flex:1 1 100%;display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center}
 #spbox input{flex:1 1 12rem;min-width:0;font:inherit;padding:.7rem .9rem;border-radius:.8rem;border:2px solid #F3B7D1;background:rgba(255,255,255,.85);color:#4A1D4D}
 #spinfo{flex:1 1 100%;font-size:.8rem;color:#6B2F6E;text-align:center;word-break:break-all}
@@ -76,21 +91,27 @@ input:focus-visible,button:focus-visible,.btn:focus-within{outline:3px solid #8E
 </div>
 <aside id="list" aria-label="Playlist"><input id="pn" type="text" aria-label="Name der Playlist"><ul id="ul"></ul></aside>
 <div id="panel">
- <input type="text" id="t" placeholder="Songtitel" aria-label="Songtitel">
- <input type="text" id="a" placeholder="Künstler" aria-label="Künstler">
- <label class="btn">Cover wählen<input type="file" id="f" accept="image/*"></label>
- <button id="add">Zur Playlist hinzufügen</button><button id="lb">Playlist</button><button id="full">Vollbild</button>
+ <div id="srch" style="display:none">
+  <div id="res"></div>
+  <input type="search" id="q" placeholder="Was möchtest du hören?" aria-label="Song, Künstler oder Album suchen" autocomplete="off" spellcheck="false">
+ </div>
+ <details id="own" hidden><summary>Eigene Songs und Playlist</summary>
+  <div class="ownrow">
+   <input type="text" id="t" placeholder="Songtitel" aria-label="Songtitel">
+   <input type="text" id="a" placeholder="Künstler" aria-label="Künstler">
+   <label class="btn">Cover wählen<input type="file" id="f" accept="image/*"></label>
+   <button id="add">Zur Playlist hinzufügen</button><button id="lb">Playlist</button>
+  </div>
+ </details>
  <button id="hide">Menü ausblenden</button>
  <div id="spbox">
   <input type="text" id="cid" placeholder="Spotify Client-ID" aria-label="Spotify Client-ID" autocomplete="off" autocapitalize="off" spellcheck="false">
   <button id="sp">Mit Spotify verbinden</button>
   <div id="spplay" style="display:none;flex:1 1 100%;gap:.6rem;flex-wrap:wrap;justify-content:center">
-   <input type="text" id="lnk" placeholder="Spotify-Link einfügen (Playlist, Album oder Song)" aria-label="Spotify-Link" autocomplete="off" autocapitalize="off" spellcheck="false">
-   <button id="go2">Abspielen</button>
    <button id="here">Ton hier abspielen</button>
   </div>
   <div id="spinfo"></div>
-  <div id="ver" style="flex:1 1 100%;text-align:center;font-size:.7rem;color:#9A6A9C">Version 6: Ton in der Seite</div>
+  <div id="ver" style="flex:1 1 100%;text-align:center;font-size:.7rem;color:#9A6A9C">Version 8: Suche und Playlists</div>
  </div>
 </div>
 <script>
@@ -102,7 +123,6 @@ disc.onkeydown=function(e){if(e.key==" "||e.key=="Enter"){e.preventDefault();tog
 $("t").oninput=function(){$("title").textContent=this.value||"Dilhins Kassette"};
 $("a").oninput=function(){$("artist").textContent=this.value||"Künstlerin"};
 $("hide").onclick=function(){panel.classList.add("hide");setTimeout(function(){var b=document.createElement("button");b.id="show";b.textContent="Menü";b.style.cssText="position:fixed;right:1rem;bottom:calc(1rem + env(safe-area-inset-bottom,0px));opacity:.5";b.onclick=function(){panel.classList.remove("hide");b.remove()};document.body.appendChild(b)},300)};
-$("full").onclick=function(){var d=document.documentElement;try{if(document.fullscreenElement){document.exitFullscreen()}else if(d.requestFullscreen){d.requestFullscreen()}}catch(e){}};
 function mix(c,k){return c.map(function(v){return Math.round(v*k)})}
 function rgb(c){return "rgb("+c.join(",")+")"}
 function colors(img){
@@ -145,7 +165,7 @@ draw();if(songs.length)play(0,false);else try{var dr=JSON.parse(localStorage.get
 try{var ic=document.createElement("canvas");ic.width=ic.height=180;var g=ic.getContext("2d");var gr=g.createLinearGradient(0,0,180,180);gr.addColorStop(0,"#F49AC1");gr.addColorStop(1,"#8E2A5E");g.fillStyle=gr;g.fillRect(0,0,180,180);g.fillStyle="#17101F";g.beginPath();g.arc(90,90,62,0,7);g.fill();g.strokeStyle="rgba(255,255,255,.2)";g.lineWidth=2;[50,38].forEach(function(r){g.beginPath();g.arc(90,90,r,0,7);g.stroke()});g.fillStyle="#F7C9DD";g.beginPath();g.arc(90,90,24,0,7);g.fill();g.fillStyle="#17101F";g.beginPath();g.arc(90,90,5,0,7);g.fill();var u=ic.toDataURL("image/png");["apple-touch-icon","icon"].forEach(function(r){var l=document.createElement("link");l.rel=r;l.href=u;document.head.appendChild(l)})}catch(e){}
 
 /* ---- Spotify ---- */
-var SP_SCOPE="streaming user-read-email user-read-private user-read-currently-playing user-read-playback-state user-modify-playback-state";
+var SP_SCOPE="streaming user-read-email user-read-private user-read-currently-playing user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative";
 var TOP=window.top;try{TOP.location.href}catch(e){TOP=window}
 function redirectUri(){try{return TOP.location.origin+TOP.location.pathname}catch(e){return location.href.split("?")[0]}}
 function lsg(k){try{return localStorage.getItem(k)}catch(e){return null}}
@@ -153,7 +173,7 @@ function lss(k,v){try{if(v===null)localStorage.removeItem(k);else localStorage.s
 function b64u(buf){var s="",a=new Uint8Array(buf);for(var i=0;i<a.length;i++)s+=String.fromCharCode(a[i]);return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
 function rnd(n){var a=new Uint8Array(n);crypto.getRandomValues(a);return b64u(a)}
 function spInfo(t){$("spinfo").textContent=t}
-function spUI(){var on=!!lsg("sp_rt");$("spplay").style.display=on?"flex":"none";$("cid").style.display=on?"none":"";$("sp").textContent=on?"Spotify trennen":"Mit Spotify verbinden";
+function spUI(){var on=!!lsg("sp_rt");$("srch").style.display=on?"block":"none";$("spplay").style.display=on?"flex":"none";$("cid").style.display=on?"none":"";$("sp").textContent=on?"Spotify trennen":"Mit Spotify verbinden";
  spInfo(on?"Verbunden. Spiel etwas in der Spotify-App, dann erscheint es hier.":"Trage diese Adresse bei Spotify als Redirect-URI ein: "+redirectUri())}
 function spStart(){
  var id=$("cid").value.trim()||lsg("sp_cid");if(!id){spInfo("Bitte zuerst die Client-ID eintragen.");return}
@@ -191,8 +211,8 @@ $("sp").onclick=function(){if(lsg("sp_rt")){spOff();if(spLoop)clearInterval(spLo
 $("cid").value=lsg("sp_cid")||"";
 (function(){var q="";try{q=TOP.location.search}catch(e){}var m=/[?&]code=([^&]+)/.exec(q),er=/[?&]error=([^&]+)/.exec(q);
  if(m){var code=decodeURIComponent(m[1]);try{TOP.history.replaceState(null,"",redirectUri())}catch(e){}
-  spToken("grant_type=authorization_code&code="+encodeURIComponent(code)+"&redirect_uri="+encodeURIComponent(redirectUri())+"&client_id="+encodeURIComponent(lsg("sp_cid")||"")+"&code_verifier="+encodeURIComponent(lsg("sp_v")||"")).then(function(){lss("sp_sc",SP_SCOPE);spUI();spRun();spSdk()}).catch(function(e){spUI();spInfo("Login fehlgeschlagen: "+e.message)})}
- else{if(er){try{TOP.history.replaceState(null,"",redirectUri())}catch(e){}}if(lsg("sp_rt")&&lsg("sp_sc")!==SP_SCOPE){spOff();spInfo("Für den Ton in der Seite bitte einmal neu mit Spotify verbinden.");return}spUI();if(lsg("sp_rt")){spRun();spSdk()}}})();
+  spToken("grant_type=authorization_code&code="+encodeURIComponent(code)+"&redirect_uri="+encodeURIComponent(redirectUri())+"&client_id="+encodeURIComponent(lsg("sp_cid")||"")+"&code_verifier="+encodeURIComponent(lsg("sp_v")||"")).then(function(){lss("sp_sc",SP_SCOPE);spUI();spRun();spSdk();spMine()}).catch(function(e){spUI();spInfo("Login fehlgeschlagen: "+e.message)})}
+ else{if(er){try{TOP.history.replaceState(null,"",redirectUri())}catch(e){}}if(lsg("sp_rt")&&lsg("sp_sc")!==SP_SCOPE){spOff();spInfo("Für den Ton in der Seite bitte einmal neu mit Spotify verbinden.");return}spUI();if(lsg("sp_rt")){spRun();spSdk();spMine()}}})();
 
 /* ---- Spotify: Ton in der Seite ---- */
 var spDev,spPlayer;
@@ -206,7 +226,7 @@ function spSdk(){
  if(window.__spsdk)return;window.__spsdk=1;
  window.onSpotifyWebPlaybackSDKReady=function(){
   spPlayer=new Spotify.Player({name:"Dilhins Kassette",getOAuthToken:function(cb){spAccess().then(cb).catch(function(){})},volume:.8});
-  spPlayer.addListener("ready",function(d){spDev=d.device_id;spInfo("Bereit: „Dilhins Kassette“ ist jetzt ein Spotify-Gerät. Link einfügen und auf Abspielen tippen.")});
+  spPlayer.addListener("ready",function(d){spDev=d.device_id;spInfo("Bereit: „Dilhins Kassette“ ist jetzt ein Spotify-Gerät. Suche einen Song und tippe ihn an.")});
   spPlayer.addListener("not_ready",function(){spDev=null});
   spPlayer.addListener("initialization_error",function(){spInfo("Dieser Browser kann Spotify nicht abspielen (zum Beispiel iPhone).")});
   spPlayer.addListener("authentication_error",function(){spInfo("Anmeldung abgelaufen. Bitte neu mit Spotify verbinden.")});
@@ -223,12 +243,33 @@ $("pp").onclick=function(){if(lsg("sp_rt"))spTog();else toggle()};
 $("next").onclick=function(){if(lsg("sp_rt")){spAct();spApi("POST","/next").then(spAgain)}else play(cur+1)};
 $("prev").onclick=function(){if(lsg("sp_rt")){spAct();spApi("POST","/previous").then(spAgain)}else play(cur-1)};
 $("here").onclick=function(){spAct();if(!spDev){spInfo("Das Gerät ist noch nicht bereit. Warte kurz und versuche es nochmal.");return}spApi("PUT","",{device_ids:[spDev],play:true}).then(function(){spInfo("Ton läuft jetzt in dieser Seite.");spAgain()})};
-$("go2").onclick=function(){
- spAct();var v=$("lnk").value.trim(),m=/open\.spotify\.com\/(?:intl-[a-z]+\/)?(playlist|album|track|artist)\/([A-Za-z0-9]+)/.exec(v)||/^spotify:(playlist|album|track|artist):([A-Za-z0-9]+)$/.exec(v);
- if(!m){spInfo("Das ist kein Spotify-Link. In Spotify: Teilen, dann Link kopieren.");return}
- var uri="spotify:"+m[1]+":"+m[2],body=m[1]=="track"?{uris:[uri]}:{context_uri:uri};
- if(!spDev){spInfo("Das Gerät ist noch nicht bereit. Warte kurz und versuche es nochmal.");return}
- spApi("PUT","/play?device_id="+spDev,body).then(function(r){if(r&&r.ok){spInfo("Wird abgespielt …");spAgain()}else if(r&&r.status!=403&&r.status!=404){spInfo("Spotify konnte das nicht abspielen (Fehler "+r.status+").")}})};
+var qT=null,resItems=[];
+function spPlayItem(it){spAct();var body=it.type=="track"?{uris:[it.uri]}:{context_uri:it.uri};
+ spApi("PUT","/play"+(spDev?"?device_id="+spDev:""),body).then(function(r){if(r&&r.ok){spInfo("Wird abgespielt: "+it.name);spAgain()}else if(r&&r.status!=403&&r.status!=404){spInfo("Spotify konnte das nicht abspielen (Fehler "+r.status+").")}})}
+function thumb(a){return a&&a.length?a[a.length-1].url:""}
+function plMap(x){return{type:"playlist",uri:x.uri,name:x.name,sub:"Playlist · "+((x.owner&&x.owner.display_name)||"Spotify"),img:thumb(x.images)}}
+function names(x){return x.artists.map(function(a){return a.name}).join(", ")}
+function renderRes(j){
+ resItems=[];var h="";
+ function sec(t,arr,mk){if(!arr||!arr.items||!arr.items.length)return;h+='<div class="rs">'+t+'</div>';arr.items.forEach(function(x){if(!x)return;var it=mk(x);resItems.push(it);h+='<button class="rr" data-k="'+(resItems.length-1)+'"><span class="rt" style="background-image:url('+it.img+')"></span><span class="rx"><b>'+esc(it.name)+'</b><i>'+esc(it.sub)+'</i></span></button>'})}
+ sec("Deine Playlists",j.mine,plMap);
+ sec("Songs",j.tracks,function(x){return{type:"track",uri:x.uri,name:x.name,sub:names(x),img:thumb(x.album&&x.album.images)}});
+ sec("Künstler",j.artists,function(x){return{type:"artist",uri:x.uri,name:x.name,sub:"Künstler",img:thumb(x.images)}});
+ sec("Alben",j.albums,function(x){return{type:"album",uri:x.uri,name:x.name,sub:"Album · "+names(x),img:thumb(x.images)}});
+ sec("Playlists",j.playlists,plMap);
+ $("res").innerHTML=h||'<div class="empty">Nichts gefunden.</div>'}
+function spSearch(v){
+ spAccess().then(function(at){return fetch("https://api.spotify.com/v1/search?type=track,artist,album,playlist&limit=4&q="+encodeURIComponent(v),{headers:{Authorization:"Bearer "+at}})}).then(function(r){
+  if(r.status==403)throw new Error("Spotify lässt die Suche für diese App nicht zu.");
+  if(r.status==429)throw new Error("Zu viele Anfragen. Warte kurz.");
+  if(!r.ok)throw new Error("Suche fehlgeschlagen ("+r.status+")");return r.json()}).then(function(j){if($("q").value.trim()!==v)return;renderRes(j)}).catch(function(e){$("res").innerHTML='<div class="empty">'+esc(e.message)+'</div>'})}
+function spMine(){
+ spAccess().then(function(at){return fetch("https://api.spotify.com/v1/me/playlists?limit=30",{headers:{Authorization:"Bearer "+at}})}).then(function(r){
+  if(r.status==401||r.status==403)throw new Error("Für deine Playlists bitte einmal neu mit Spotify verbinden.");
+  if(!r.ok)throw new Error("Playlists konnten nicht geladen werden ("+r.status+")");return r.json()}).then(function(j){
+  if($("q").value.trim())return;renderRes({mine:{items:(j.items||[]).filter(Boolean)}})}).catch(function(e){if(!$("q").value.trim())$("res").innerHTML='<div class="empty">'+esc(e.message)+'</div>'})}
+$("q").oninput=function(){clearTimeout(qT);var v=this.value.trim();if(!v){spMine();return}qT=setTimeout(function(){spSearch(v)},300)};
+$("res").onclick=function(e){var b=e.target.closest("button.rr");if(!b)return;spPlayItem(resItems[+b.dataset.k])};
 $("hide").onclick();
 </script>
 </body>
