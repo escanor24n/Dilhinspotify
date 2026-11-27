@@ -15,10 +15,6 @@ html,body{margin:0;height:100%;background:#2E1233}
 body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
 iframe{flex:1;min-height:0;width:100%;border:0;display:none;background:#5B2A5E}
 iframe.on{display:block}
-nav{display:flex;gap:.5rem;background:#2E1233;padding:.45rem .6rem calc(.45rem + env(safe-area-inset-bottom,0px))}
-nav button{flex:1;font:700 1rem Quicksand,system-ui,sans-serif;padding:.75rem .5rem;border:0;border-radius:2rem;background:transparent;color:#F7C9DD;cursor:pointer}
-nav button[aria-selected=true]{background:linear-gradient(135deg,#E5619A,#C23C7C);color:#fff}
-nav button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 </style>
 </head>
 <body>
@@ -215,102 +211,7 @@ $(&quot;hide&quot;).onclick();
 &lt;/body&gt;
 &lt;/html&gt;
 "></iframe>
-<iframe id="p2" title="Worauf hast du Lust?" srcdoc="&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;de&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;utf-8&quot;&gt;
-&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover&quot;&gt;
-&lt;title&gt;Worauf hast du Lust?&lt;/title&gt;
-&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
-&lt;style&gt;
-:root{--bg:#F4F1FB;--card:#FFFFFF;--ink:#241B3A;--soft:#6D6585;--accent:#6C3FE0;--on-accent:#FFFFFF;--mint:#BDEBD3;--mint-ink:#0F4A31;--line:#DCD5EE;
-box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme=&quot;light&quot;]){--bg:#1A1428;--card:#261E3A;--ink:#F1ECFF;--soft:#A99FC7;--accent:#9C7BFF;--on-accent:#161026;--mint:#2B5A46;--mint-ink:#D5F5E5;--line:#3B3156}}
-:root[data-theme=&quot;dark&quot;]{--bg:#1A1428;--card:#261E3A;--ink:#F1ECFF;--soft:#A99FC7;--accent:#9C7BFF;--on-accent:#161026;--mint:#2B5A46;--mint-ink:#D5F5E5;--line:#3B3156}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:&quot;Bricolage Grotesque&quot;,system-ui,-apple-system,&quot;Segoe UI&quot;,sans-serif;min-height:100vh}
-main{max-width:30rem;margin:0 auto;padding:1.5rem 1.25rem 3rem}
-h1{font-size:2.1rem;line-height:1.1;margin:.5rem 0 .75rem;font-weight:800}
-p{color:var(--soft);line-height:1.5;margin:.25rem 0 1rem}
-input{width:100%;font:inherit;padding:.8rem 1rem;border:2px solid var(--line);border-radius:.9rem;background:var(--card);color:var(--ink);margin-bottom:.75rem}
-input:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-button{font:inherit;font-weight:700;border:0;border-radius:.9rem;padding:1rem 1.25rem;cursor:pointer;background:var(--accent);color:var(--on-accent);width:100%}
-button.alt{background:transparent;color:var(--ink);border:2px solid var(--line)}
-.row{display:flex;gap:.75rem;margin-top:1rem}
-.card{background:var(--card);border:2px solid var(--line);border-radius:1.5rem;padding:2.5rem 1.5rem;text-align:center;margin:1rem 0}
-.card .e{font-size:4.5rem;line-height:1}
-.card h2{font-size:1.9rem;margin:1rem 0 0;font-weight:800}
-.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
-.bar i{display:block;height:100%;background:var(--accent);transition:width .25s}
-.hand{text-align:center;padding-top:3rem}
-.match{display:flex;align-items:center;gap:.9rem;background:var(--mint);color:var(--mint-ink);border-radius:1rem;padding:.9rem 1.1rem;margin:.5rem 0;font-weight:700}
-.match span{font-size:1.8rem}
-.pick{background:var(--accent);color:var(--on-accent);border-radius:1.5rem;padding:2rem 1.5rem;text-align:center;margin:1rem 0;font-size:1.6rem;font-weight:800}
-.pick small{display:block;font-weight:500;font-size:1rem;opacity:.85;margin-bottom:.4rem}
-.maybe{color:var(--soft);margin:.35rem 0}
-@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
-&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;main id=&quot;app&quot;&gt;&lt;/main&gt;
-&lt;script&gt;
-var acts=[[&quot;🎬&quot;,&quot;Kino oder Filmabend&quot;],[&quot;🥾&quot;,&quot;Spazieren gehen&quot;],[&quot;🍳&quot;,&quot;Zusammen kochen&quot;],[&quot;☕&quot;,&quot;Café und Kuchen&quot;],[&quot;🛍️&quot;,&quot;Bummeln in der Stadt&quot;],[&quot;🚗&quot;,&quot;Ausflug ins Grüne&quot;],[&quot;🎲&quot;,&quot;Spieleabend&quot;],[&quot;🍕&quot;,&quot;Essen gehen&quot;],[&quot;🛋️&quot;,&quot;Faulenzen zu Hause&quot;],[&quot;🎳&quot;,&quot;Bowling oder Minigolf&quot;],[&quot;🌳&quot;,&quot;Picknick im Park&quot;],[&quot;🛁&quot;,&quot;Wellness und Entspannung&quot;]];
-var S={step:&quot;start&quot;,names:[&quot;&quot;,&quot;&quot;],who:0,i:0,votes:[[],[]],pick:null};
-var app=document.getElementById(&quot;app&quot;);
-function esc(t){return String(t).replace(/[&amp;&lt;&gt;&quot;]/g,function(c){return{&quot;&amp;&quot;:&quot;&amp;amp;&quot;,&quot;&lt;&quot;:&quot;&amp;lt;&quot;,&quot;&gt;&quot;:&quot;&amp;gt;&quot;,&#x27;&quot;&#x27;:&quot;&amp;quot;&quot;}[c]})}
-function nm(k){return S.names[k]||(k?&quot;Sie&quot;:&quot;Du&quot;)}
-function render(){
- var h=&quot;&quot;;
- if(S.step==&quot;start&quot;){
-  h=&#x27;&lt;h1&gt;Worauf hast du Lust?&lt;/h1&gt;&lt;p&gt;Jeder entscheidet für sich, ohne dass der andere es sieht. Am Ende seht ihr, was euch beiden gefällt.&lt;/p&gt;&#x27;+
-  &#x27;&lt;input id=&quot;n0&quot; placeholder=&quot;Dein Name&quot; value=&quot;&#x27;+esc(S.names[0])+&#x27;&quot; aria-label=&quot;Dein Name&quot;&gt;&#x27;+
-  &#x27;&lt;input id=&quot;n1&quot; placeholder=&quot;Name deiner Freundin&quot; value=&quot;&#x27;+esc(S.names[1])+&#x27;&quot; aria-label=&quot;Name deiner Freundin&quot;&gt;&#x27;+
-  &#x27;&lt;input id=&quot;own&quot; placeholder=&quot;Eigene Idee hinzufügen (optional)&quot; aria-label=&quot;Eigene Idee&quot;&gt;&#x27;+
-  &#x27;&lt;button id=&quot;go&quot;&gt;Los geht’s&lt;/button&gt;&#x27;;
- }else if(S.step==&quot;turn&quot;){
-  var a=acts[S.i];
-  h=&#x27;&lt;p&gt;&lt;b&gt;&#x27;+esc(nm(S.who))+&#x27;&lt;/b&gt; ist dran – &#x27;+(S.i+1)+&#x27; von &#x27;+acts.length+&#x27;&lt;/p&gt;&lt;div class=&quot;bar&quot;&gt;&lt;i style=&quot;width:&#x27;+(S.i/acts.length*100)+&#x27;%&quot;&gt;&lt;/i&gt;&lt;/div&gt;&#x27;+
-  &#x27;&lt;div class=&quot;card&quot;&gt;&lt;div class=&quot;e&quot;&gt;&#x27;+a[0]+&#x27;&lt;/div&gt;&lt;h2&gt;&#x27;+esc(a[1])+&#x27;&lt;/h2&gt;&lt;/div&gt;&#x27;+
-  &#x27;&lt;div class=&quot;row&quot;&gt;&lt;button class=&quot;alt&quot; id=&quot;no&quot;&gt;Nicht heute&lt;/button&gt;&lt;button id=&quot;yes&quot;&gt;Hätte Lust&lt;/button&gt;&lt;/div&gt;&#x27;;
- }else if(S.step==&quot;hand&quot;){
-  h=&#x27;&lt;div class=&quot;hand&quot;&gt;&lt;h1&gt;Fertig, &#x27;+esc(nm(0))+&#x27;!&lt;/h1&gt;&lt;p&gt;Gib das Handy jetzt an &#x27;+esc(nm(1))+&#x27; weiter.&lt;/p&gt;&lt;button id=&quot;next&quot;&gt;&#x27;+esc(nm(1))+&#x27; ist bereit&lt;/button&gt;&lt;/div&gt;&#x27;;
- }else{
-  var both=[],one=[];
-  acts.forEach(function(a,k){var x=S.votes[0].indexOf(k)&gt;-1,y=S.votes[1].indexOf(k)&gt;-1;if(x&amp;&amp;y)both.push(a);else if(x||y)one.push(a)});
-  h=&#x27;&lt;h1&gt;Das habt ihr gemeinsam&lt;/h1&gt;&#x27;;
-  if(both.length){both.forEach(function(a){h+=&#x27;&lt;div class=&quot;match&quot;&gt;&lt;span&gt;&#x27;+a[0]+&#x27;&lt;/span&gt;&#x27;+esc(a[1])+&#x27;&lt;/div&gt;&#x27;});
-   h+=&#x27;&lt;div id=&quot;pick&quot;&gt;&#x27;+(S.pick?&#x27;&lt;div class=&quot;pick&quot;&gt;&lt;small&gt;Euer Wochenend-Tipp&lt;/small&gt;&#x27;+S.pick[0]+&#x27; &#x27;+esc(S.pick[1])+&#x27;&lt;/div&gt;&#x27;:&#x27;&#x27;)+&#x27;&lt;/div&gt;&lt;button id=&quot;dice&quot;&gt;&#x27;+(S.pick?&#x27;Nochmal würfeln&#x27;:&#x27;Für uns entscheiden&#x27;)+&#x27;&lt;/button&gt;&#x27;;}
-  else{h+=&#x27;&lt;p&gt;Diesmal gab es keine Übereinstimmung. Versucht es nochmal mit mehr Ideen.&lt;/p&gt;&#x27;;}
-  if(one.length){h+=&#x27;&lt;p style=&quot;margin-top:1.5rem&quot;&gt;Nur einer von euch hätte Lust auf:&lt;/p&gt;&#x27;;one.forEach(function(a){h+=&#x27;&lt;div class=&quot;maybe&quot;&gt;&#x27;+a[0]+&#x27; &#x27;+esc(a[1])+&#x27;&lt;/div&gt;&#x27;})}
-  h+=&#x27;&lt;div class=&quot;row&quot;&gt;&lt;button class=&quot;alt&quot; id=&quot;again&quot;&gt;Neue Runde&lt;/button&gt;&lt;/div&gt;&#x27;;
- }
- app.innerHTML=h;wire();
-}
-function wire(){
- var $=function(i){return document.getElementById(i)};
- if($(&quot;go&quot;))$(&quot;go&quot;).onclick=function(){S.names=[$(&quot;n0&quot;).value.trim(),$(&quot;n1&quot;).value.trim()];var o=$(&quot;own&quot;).value.trim();if(o&amp;&amp;!acts.some(function(a){return a[1]==o}))acts.push([&quot;✨&quot;,o]);S.step=&quot;turn&quot;;S.who=0;S.i=0;S.votes=[[],[]];S.pick=null;render()};
- var vote=function(y){if(y)S.votes[S.who].push(S.i);S.i++;if(S.i&gt;=acts.length){if(S.who==0){S.step=&quot;hand&quot;}else{S.step=&quot;result&quot;}}render()};
- if($(&quot;yes&quot;))$(&quot;yes&quot;).onclick=function(){vote(true)};
- if($(&quot;no&quot;))$(&quot;no&quot;).onclick=function(){vote(false)};
- if($(&quot;next&quot;))$(&quot;next&quot;).onclick=function(){S.who=1;S.i=0;S.step=&quot;turn&quot;;render()};
- if($(&quot;dice&quot;))$(&quot;dice&quot;).onclick=function(){var b=acts.filter(function(a,k){return S.votes[0].indexOf(k)&gt;-1&amp;&amp;S.votes[1].indexOf(k)&gt;-1});S.pick=b[Math.floor(Math.random()*b.length)];render()};
- if($(&quot;again&quot;))$(&quot;again&quot;).onclick=function(){S.step=&quot;start&quot;;render()};
-}
-render();
-&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-"></iframe>
-<nav role="tablist">
-<button role="tab" aria-selected="true" data-t="p1">💿 Platte</button>
-<button role="tab" aria-selected="false" data-t="p2">💜 Worauf hast du Lust?</button>
-</nav>
 <script>
-document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){
- document.querySelectorAll("nav button").forEach(function(x){x.setAttribute("aria-selected",x==b?"true":"false")});
- document.querySelectorAll("iframe").forEach(function(f){f.classList.toggle("on",f.id==b.dataset.t)});
-}});
 try{var ic=document.createElement("canvas");ic.width=ic.height=180;var g=ic.getContext("2d");var gr=g.createLinearGradient(0,0,180,180);gr.addColorStop(0,"#F49AC1");gr.addColorStop(1,"#8E2A5E");g.fillStyle=gr;g.fillRect(0,0,180,180);g.fillStyle="#17101F";g.beginPath();g.arc(90,90,62,0,7);g.fill();g.strokeStyle="rgba(255,255,255,.2)";g.lineWidth=2;[50,38].forEach(function(r){g.beginPath();g.arc(90,90,r,0,7);g.stroke()});g.fillStyle="#F7C9DD";g.beginPath();g.arc(90,90,24,0,7);g.fill();g.fillStyle="#17101F";g.beginPath();g.arc(90,90,5,0,7);g.fill();var u=ic.toDataURL("image/png");["apple-touch-icon","icon"].forEach(function(r){var l=document.createElement("link");l.rel=r;l.href=u;document.head.appendChild(l)})}catch(e){}
 </script>
 </body>
