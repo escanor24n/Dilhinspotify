@@ -120,7 +120,7 @@ button.ghost{background:rgba(255,255,255,.85);color:#8E2A5E;border:2px solid #F3
   <div class="prow"><span>Hintergrund</span><div class="grp"><label class="btn">Ändern<input type="file" id="bgf" accept="image/*"></label><button id="bgr" class="ghost" style="display:none">Zurücksetzen</button></div></div>
   <div class="prow"><span>Bild in der Mitte</span><div class="grp"><label class="btn">Ändern<input type="file" id="cf" accept="image/*"></label><button id="crs" class="ghost" style="display:none">Zurücksetzen</button></div></div>
   <div class="prow"><span>Song-Cover zeigen</span><div class="seg" role="group" aria-label="Wo das Song-Cover erscheint"><button id="cp-disc" aria-pressed="true">Auf der Platte</button><button id="cp-ctr" aria-pressed="false">In der Mitte</button></div></div>
-  <p id="picnote">Das Cover des laufenden Songs erscheint dort, wo du es einstellst. Liegt es auf der Platte, bleibt in der Mitte dein Bild. Liegt es in der Mitte, bleibt die Platte schwarz. Alle Einstellungen bleiben gespeichert, bis du sie änderst.</p>
+  <p id="picnote">Das Cover des laufenden Songs erscheint dort, wo du es einstellst, und dein Bild in der Mitte tauscht mit ihm den Platz. Liegt das Cover auf der Platte, bleibt dein Bild in der Mitte. Liegt das Cover in der Mitte, liegt dein Bild auf der Platte. Alle Einstellungen bleiben gespeichert.</p>
  </section>
  <section class="tab" id="tab-spot" style="display:none">
   <div id="spbox">
@@ -130,7 +130,7 @@ button.ghost{background:rgba(255,255,255,.85);color:#8E2A5E;border:2px solid #F3
    <button id="here">Ton hier abspielen</button>
   </div>
   <div id="spinfo"></div>
-  <div id="ver" style="flex:1 1 100%;text-align:center;font-size:.7rem;color:#9A6A9C">Version 14: Cover auf Platte oder Mitte</div>
+  <div id="ver" style="flex:1 1 100%;text-align:center;font-size:.7rem;color:#9A6A9C">Version 15: Bilder tauschen den Platz</div>
  </div>
  </section>
  <details id="own" hidden><summary>Eigene Songs und Playlist</summary>
@@ -312,7 +312,7 @@ $("bgf").onchange=function(){var f=this.files[0];if(!f)return;var rd=new FileRea
 $("bgr").onclick=function(){setBg(null);try{localStorage.removeItem("bg1")}catch(e){}};
 try{setBg(localStorage.getItem("bg1"))}catch(e){setBg(null)}
 var covPos="disc",spCoverNow,DEF0=DEF.img;
-function applyCover(){var c=spCoverNow||null;if(covPos=="center"){setDisc(null);setLabel(c)}else{setLabel(null);setDisc(c)}}
+function applyCover(){var c=spCoverNow||null;if(covPos=="center"&&c){setLabel(c);setDisc(DEF.img)}else if(covPos=="center"){setLabel(null);setDisc(null)}else{setLabel(null);setDisc(c)}}
 function pickImg(file,max,cb){if(!file)return;var rd=new FileReader();
  rd.onload=function(){var im=new Image();
   im.onload=function(){var m=Math.min(1,max/Math.max(im.width,im.height)),cv=document.createElement("canvas");cv.width=Math.round(im.width*m);cv.height=Math.round(im.height*m);cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);cb(cv.toDataURL("image/jpeg",.86))};
