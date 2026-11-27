@@ -67,6 +67,9 @@ input:focus-visible,button:focus-visible,.btn:focus-within{outline:3px solid #8E
 .tab{flex:1 1 100%}
 #nomusic{display:none;color:#6B2F6E;text-align:center;padding:1rem .5rem;font-weight:700}
 .prow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:space-between;background:rgba(255,255,255,.6);border-radius:1rem;padding:.55rem .8rem;margin:.4rem 0;color:#4A1D4D;font-weight:700}
+.seg{display:flex;gap:.2rem;background:rgba(255,255,255,.85);border-radius:2rem;padding:.2rem}
+.seg button{background:transparent;color:#8E2A5E;padding:.45rem .9rem}
+.seg button[aria-pressed=true]{background:linear-gradient(135deg,#E5619A,#C23C7C);color:#fff}
 .prow .grp{display:flex;gap:.5rem;flex-wrap:wrap}
 button.ghost{background:rgba(255,255,255,.85);color:#8E2A5E;border:2px solid #F3B7D1}
 #picnote{font-size:.8rem;color:#6B2F6E;margin:.4rem .3rem 0;text-align:center}
@@ -116,8 +119,8 @@ button.ghost{background:rgba(255,255,255,.85);color:#8E2A5E;border:2px solid #F3
  <section class="tab" id="tab-pics" style="display:none">
   <div class="prow"><span>Hintergrund</span><div class="grp"><label class="btn">Ändern<input type="file" id="bgf" accept="image/*"></label><button id="bgr" class="ghost" style="display:none">Zurücksetzen</button></div></div>
   <div class="prow"><span>Bild in der Mitte</span><div class="grp"><label class="btn">Ändern<input type="file" id="cf" accept="image/*"></label><button id="crs" class="ghost" style="display:none">Zurücksetzen</button></div></div>
-  <div class="prow"><span>Bild auf der Platte</span><div class="grp"><label class="btn">Ändern<input type="file" id="df" accept="image/*"></label><button id="drs" class="ghost" style="display:none">Automatisch</button></div></div>
-  <p id="picnote">Ein eigenes Bild auf der Platte ersetzt das Song-Cover. Mit „Automatisch“ zeigt die Platte wieder das Cover des laufenden Songs. Alle Bilder bleiben gespeichert, bis du sie änderst.</p>
+  <div class="prow"><span>Song-Cover zeigen</span><div class="seg" role="group" aria-label="Wo das Song-Cover erscheint"><button id="cp-disc" aria-pressed="true">Auf der Platte</button><button id="cp-ctr" aria-pressed="false">In der Mitte</button></div></div>
+  <p id="picnote">Das Cover des laufenden Songs erscheint dort, wo du es einstellst. Liegt es auf der Platte, bleibt in der Mitte dein Bild. Liegt es in der Mitte, bleibt die Platte schwarz. Alle Einstellungen bleiben gespeichert, bis du sie änderst.</p>
  </section>
  <section class="tab" id="tab-spot" style="display:none">
   <div id="spbox">
@@ -127,7 +130,7 @@ button.ghost{background:rgba(255,255,255,.85);color:#8E2A5E;border:2px solid #F3
    <button id="here">Ton hier abspielen</button>
   </div>
   <div id="spinfo"></div>
-  <div id="ver" style="flex:1 1 100%;text-align:center;font-size:.7rem;color:#9A6A9C">Version 13: Menü mit Tabs, eigene Bilder</div>
+  <div id="ver" style="flex:1 1 100%;text-align:center;font-size:.7rem;color:#9A6A9C">Version 14: Cover auf Platte oder Mitte</div>
  </div>
  </section>
  <details id="own" hidden><summary>Eigene Songs und Playlist</summary>
@@ -217,12 +220,12 @@ function spAccess(){
  var at=lsg("sp_at"),ex=+lsg("sp_exp")||0;if(at&&Date.now()<ex)return Promise.resolve(at);
  var rt=lsg("sp_rt"),id=lsg("sp_cid");if(!rt||!id)return Promise.reject(new Error("nicht verbunden"));
  return spToken("grant_type=refresh_token&refresh_token="+encodeURIComponent(rt)+"&client_id="+encodeURIComponent(id))}
-function spOff(){spCoverNow=null;setDisc(discCustom);["sp_at","sp_exp","sp_rt","sp_v"].forEach(function(k){lss(k,null)});spLast=null;spUI()}
+function spOff(){spCoverNow=null;applyCover();["sp_at","sp_exp","sp_rt","sp_v"].forEach(function(k){lss(k,null)});spLast=null;spUI()}
 var spLast=null,spLoop=null;
 function spShow(it,playing){
  var cov=it.album&&it.album.images&&it.album.images[0]?it.album.images[0].url:null;
  $("title").textContent=it.name;$("artist").textContent=it.artists.map(function(a){return a.name}).join(", ");
- spCoverNow=cov;setLabel(null);if(cov){if(!discCustom)setDisc(cov);var im=new Image();im.crossOrigin="anonymous";im.onload=function(){try{setCols(colors(im))}catch(e){}};im.src=cov}
+ spCoverNow=cov;applyCover();if(cov){var im=new Image();im.crossOrigin="anonymous";im.onload=function(){try{setCols(colors(im))}catch(e){}};im.src=cov}
  if(playing){disc.classList.add("on");arm.classList.add("on")}else{disc.classList.remove("on");arm.classList.remove("on")}}
 function spPoll(){
  spAccess().then(function(at){return fetch("https://api.spotify.com/v1/me/player/currently-playing",{headers:{Authorization:"Bearer "+at}})}).then(function(r){
@@ -308,20 +311,22 @@ $("bgf").onchange=function(){var f=this.files[0];if(!f)return;var rd=new FileRea
  rd.readAsDataURL(f);this.value=""};
 $("bgr").onclick=function(){setBg(null);try{localStorage.removeItem("bg1")}catch(e){}};
 try{setBg(localStorage.getItem("bg1"))}catch(e){setBg(null)}
-var discCustom,spCoverNow,DEF0=DEF.img;
+var covPos="disc",spCoverNow,DEF0=DEF.img;
+function applyCover(){var c=spCoverNow||null;if(covPos=="center"){setDisc(null);setLabel(c)}else{setLabel(null);setDisc(c)}}
 function pickImg(file,max,cb){if(!file)return;var rd=new FileReader();
  rd.onload=function(){var im=new Image();
   im.onload=function(){var m=Math.min(1,max/Math.max(im.width,im.height)),cv=document.createElement("canvas");cv.width=Math.round(im.width*m);cv.height=Math.round(im.height*m);cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);cb(cv.toDataURL("image/jpeg",.86))};
   im.onerror=function(){spInfo("Dieses Bild konnte nicht geladen werden.")};im.src=rd.result};
  rd.readAsDataURL(file)}
 function keep(k,v){try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){spInfo("Das Bild ist gesetzt, konnte aber nicht dauerhaft gespeichert werden.")}}
-function applyCenter(u){DEF.img=u||DEF0;setLabel(null);$("crs").style.display=u?"":"none"}
-function applyDisc(u){discCustom=u||null;setDisc(u||spCoverNow||null);$("drs").style.display=u?"":"none"}
+function applyCenter(u){DEF.img=u||DEF0;applyCover();$("crs").style.display=u?"":"none"}
 $("cf").onchange=function(){var f=this.files[0];this.value="";pickImg(f,700,function(u){keep("ctr1",u);applyCenter(u)})};
 $("crs").onclick=function(){keep("ctr1",null);applyCenter(null)};
-$("df").onchange=function(){var f=this.files[0];this.value="";pickImg(f,900,function(u){keep("dsc1",u);applyDisc(u)})};
-$("drs").onclick=function(){keep("dsc1",null);applyDisc(null)};
-try{var c1=localStorage.getItem("ctr1");if(c1)applyCenter(c1);var d1=localStorage.getItem("dsc1");if(d1)applyDisc(d1)}catch(e){}
+try{var c1=localStorage.getItem("ctr1");if(c1)applyCenter(c1);localStorage.removeItem("dsc1");var cp=localStorage.getItem("covpos");if(cp=="center"||cp=="disc")covPos=cp}catch(e){}
+function paintPos(){$("cp-disc").setAttribute("aria-pressed",covPos=="disc"?"true":"false");$("cp-ctr").setAttribute("aria-pressed",covPos=="center"?"true":"false")}
+function setPos(p){covPos=p;keep("covpos",p);paintPos();applyCover()}
+$("cp-disc").onclick=function(){setPos("disc")};$("cp-ctr").onclick=function(){setPos("center")};
+paintPos();applyCover();
 function updPP(){var on=disc.classList.contains("on"),b=$("pp");b.textContent=on?"■ Stopp":"▶ Play";b.setAttribute("aria-label",on?"Stopp":"Abspielen")}
 new MutationObserver(updPP).observe(disc,{attributes:true,attributeFilter:["class"]});updPP();
 function tab(n){["music","pics","spot"].forEach(function(k){$("tab-"+k).style.display=k==n?"block":"none"});document.querySelectorAll("#tabs button").forEach(function(b){b.setAttribute("aria-selected",b.dataset.t==n?"true":"false")})}
