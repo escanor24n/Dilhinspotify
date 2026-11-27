@@ -84,7 +84,13 @@ input:focus-visible,button:focus-visible,.btn:focus-within{outline:3px solid #8E
  <div id="spbox">
   <input type="text" id="cid" placeholder="Spotify Client-ID" aria-label="Spotify Client-ID" autocomplete="off" autocapitalize="off" spellcheck="false">
   <button id="sp">Mit Spotify verbinden</button>
+  <div id="spplay" style="display:none;flex:1 1 100%;gap:.6rem;flex-wrap:wrap;justify-content:center">
+   <input type="text" id="lnk" placeholder="Spotify-Link einfügen (Playlist, Album oder Song)" aria-label="Spotify-Link" autocomplete="off" autocapitalize="off" spellcheck="false">
+   <button id="go2">Abspielen</button>
+   <button id="here">Ton hier abspielen</button>
+  </div>
   <div id="spinfo"></div>
+  <div id="ver" style="flex:1 1 100%;text-align:center;font-size:.7rem;color:#9A6A9C">Version 6: Ton in der Seite</div>
  </div>
 </div>
 <script>
@@ -139,7 +145,7 @@ draw();if(songs.length)play(0,false);else try{var dr=JSON.parse(localStorage.get
 try{var ic=document.createElement("canvas");ic.width=ic.height=180;var g=ic.getContext("2d");var gr=g.createLinearGradient(0,0,180,180);gr.addColorStop(0,"#F49AC1");gr.addColorStop(1,"#8E2A5E");g.fillStyle=gr;g.fillRect(0,0,180,180);g.fillStyle="#17101F";g.beginPath();g.arc(90,90,62,0,7);g.fill();g.strokeStyle="rgba(255,255,255,.2)";g.lineWidth=2;[50,38].forEach(function(r){g.beginPath();g.arc(90,90,r,0,7);g.stroke()});g.fillStyle="#F7C9DD";g.beginPath();g.arc(90,90,24,0,7);g.fill();g.fillStyle="#17101F";g.beginPath();g.arc(90,90,5,0,7);g.fill();var u=ic.toDataURL("image/png");["apple-touch-icon","icon"].forEach(function(r){var l=document.createElement("link");l.rel=r;l.href=u;document.head.appendChild(l)})}catch(e){}
 
 /* ---- Spotify ---- */
-var SP_SCOPE="user-read-currently-playing user-read-playback-state";
+var SP_SCOPE="streaming user-read-email user-read-private user-read-currently-playing user-read-playback-state user-modify-playback-state";
 var TOP=window.top;try{TOP.location.href}catch(e){TOP=window}
 function redirectUri(){try{return TOP.location.origin+TOP.location.pathname}catch(e){return location.href.split("?")[0]}}
 function lsg(k){try{return localStorage.getItem(k)}catch(e){return null}}
@@ -147,7 +153,7 @@ function lss(k,v){try{if(v===null)localStorage.removeItem(k);else localStorage.s
 function b64u(buf){var s="",a=new Uint8Array(buf);for(var i=0;i<a.length;i++)s+=String.fromCharCode(a[i]);return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
 function rnd(n){var a=new Uint8Array(n);crypto.getRandomValues(a);return b64u(a)}
 function spInfo(t){$("spinfo").textContent=t}
-function spUI(){var on=!!lsg("sp_rt");$("cid").style.display=on?"none":"";$("sp").textContent=on?"Spotify trennen":"Mit Spotify verbinden";
+function spUI(){var on=!!lsg("sp_rt");$("spplay").style.display=on?"flex":"none";$("cid").style.display=on?"none":"";$("sp").textContent=on?"Spotify trennen":"Mit Spotify verbinden";
  spInfo(on?"Verbunden. Spiel etwas in der Spotify-App, dann erscheint es hier.":"Trage diese Adresse bei Spotify als Redirect-URI ein: "+redirectUri())}
 function spStart(){
  var id=$("cid").value.trim()||lsg("sp_cid");if(!id){spInfo("Bitte zuerst die Client-ID eintragen.");return}
@@ -185,8 +191,44 @@ $("sp").onclick=function(){if(lsg("sp_rt")){spOff();if(spLoop)clearInterval(spLo
 $("cid").value=lsg("sp_cid")||"";
 (function(){var q="";try{q=TOP.location.search}catch(e){}var m=/[?&]code=([^&]+)/.exec(q),er=/[?&]error=([^&]+)/.exec(q);
  if(m){var code=decodeURIComponent(m[1]);try{TOP.history.replaceState(null,"",redirectUri())}catch(e){}
-  spToken("grant_type=authorization_code&code="+encodeURIComponent(code)+"&redirect_uri="+encodeURIComponent(redirectUri())+"&client_id="+encodeURIComponent(lsg("sp_cid")||"")+"&code_verifier="+encodeURIComponent(lsg("sp_v")||"")).then(function(){spUI();spRun()}).catch(function(e){spUI();spInfo("Login fehlgeschlagen: "+e.message)})}
- else{if(er){try{TOP.history.replaceState(null,"",redirectUri())}catch(e){}}spUI();if(lsg("sp_rt"))spRun()}})();
+  spToken("grant_type=authorization_code&code="+encodeURIComponent(code)+"&redirect_uri="+encodeURIComponent(redirectUri())+"&client_id="+encodeURIComponent(lsg("sp_cid")||"")+"&code_verifier="+encodeURIComponent(lsg("sp_v")||"")).then(function(){lss("sp_sc",SP_SCOPE);spUI();spRun();spSdk()}).catch(function(e){spUI();spInfo("Login fehlgeschlagen: "+e.message)})}
+ else{if(er){try{TOP.history.replaceState(null,"",redirectUri())}catch(e){}}if(lsg("sp_rt")&&lsg("sp_sc")!==SP_SCOPE){spOff();spInfo("Für den Ton in der Seite bitte einmal neu mit Spotify verbinden.");return}spUI();if(lsg("sp_rt")){spRun();spSdk()}}})();
+
+/* ---- Spotify: Ton in der Seite ---- */
+var spDev,spPlayer;
+function spApi(method,path,body){
+ return spAccess().then(function(at){return fetch("https://api.spotify.com/v1/me/player"+path,{method:method,headers:{Authorization:"Bearer "+at,"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined})}).then(function(r){
+  if(r.status==404)spInfo("Kein aktives Spotify-Gerät. Tippe auf „Ton hier abspielen“.");
+  else if(r.status==403)spInfo("Das funktioniert nur mit Spotify Premium.");
+  else if(r.status==401){lss("sp_at",null)}
+  return r}).catch(function(e){spInfo("Spotify: "+e.message)})}
+function spSdk(){
+ if(window.__spsdk)return;window.__spsdk=1;
+ window.onSpotifyWebPlaybackSDKReady=function(){
+  spPlayer=new Spotify.Player({name:"Dilhins Kassette",getOAuthToken:function(cb){spAccess().then(cb).catch(function(){})},volume:.8});
+  spPlayer.addListener("ready",function(d){spDev=d.device_id;spInfo("Bereit: „Dilhins Kassette“ ist jetzt ein Spotify-Gerät. Link einfügen und auf Abspielen tippen.")});
+  spPlayer.addListener("not_ready",function(){spDev=null});
+  spPlayer.addListener("initialization_error",function(){spInfo("Dieser Browser kann Spotify nicht abspielen (zum Beispiel iPhone).")});
+  spPlayer.addListener("authentication_error",function(){spInfo("Anmeldung abgelaufen. Bitte neu mit Spotify verbinden.")});
+  spPlayer.addListener("account_error",function(){spInfo("Für Ton in der Seite braucht das Spotify-Konto Premium.")});
+  spPlayer.addListener("playback_error",function(e){spInfo("Wiedergabe-Fehler: "+(e&&e.message||""))});
+  spPlayer.connect()};
+ var sc=document.createElement("script");sc.src="https://sdk.scdn.co/spotify-player.js";document.body.appendChild(sc)}
+function spAct(){try{if(spPlayer&&spPlayer.activateElement)spPlayer.activateElement()}catch(e){}}
+function spAgain(){setTimeout(spPoll,900)}
+function spTog(){spAct();var playing=disc.classList.contains("on");spApi("PUT",playing?"/pause":"/play"+(spDev?"?device_id="+spDev:"")).then(spAgain)}
+disc.onclick=function(){if(lsg("sp_rt"))spTog();else toggle()};
+disc.onkeydown=function(e){if(e.key==" "||e.key=="Enter"){e.preventDefault();disc.onclick()}};
+$("pp").onclick=function(){if(lsg("sp_rt"))spTog();else toggle()};
+$("next").onclick=function(){if(lsg("sp_rt")){spAct();spApi("POST","/next").then(spAgain)}else play(cur+1)};
+$("prev").onclick=function(){if(lsg("sp_rt")){spAct();spApi("POST","/previous").then(spAgain)}else play(cur-1)};
+$("here").onclick=function(){spAct();if(!spDev){spInfo("Das Gerät ist noch nicht bereit. Warte kurz und versuche es nochmal.");return}spApi("PUT","",{device_ids:[spDev],play:true}).then(function(){spInfo("Ton läuft jetzt in dieser Seite.");spAgain()})};
+$("go2").onclick=function(){
+ spAct();var v=$("lnk").value.trim(),m=/open\.spotify\.com\/(?:intl-[a-z]+\/)?(playlist|album|track|artist)\/([A-Za-z0-9]+)/.exec(v)||/^spotify:(playlist|album|track|artist):([A-Za-z0-9]+)$/.exec(v);
+ if(!m){spInfo("Das ist kein Spotify-Link. In Spotify: Teilen, dann Link kopieren.");return}
+ var uri="spotify:"+m[1]+":"+m[2],body=m[1]=="track"?{uris:[uri]}:{context_uri:uri};
+ if(!spDev){spInfo("Das Gerät ist noch nicht bereit. Warte kurz und versuche es nochmal.");return}
+ spApi("PUT","/play?device_id="+spDev,body).then(function(r){if(r&&r.ok){spInfo("Wird abgespielt …");spAgain()}else if(r&&r.status!=403&&r.status!=404){spInfo("Spotify konnte das nicht abspielen (Fehler "+r.status+").")}})};
 $("hide").onclick();
 </script>
 </body>
